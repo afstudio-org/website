@@ -321,7 +321,8 @@
 </head>
 <body>
   <!-- Site Title (fixed at top) -->
-  <a href="/" class="site-title">AF STUDIO</a>
+  <!-- CHANGE: Use relative path to the index file itself -->
+  <a href="./" class="site-title">AF STUDIO</a> 
 
   <!-- Warning Container (initially visible) -->
   <div id="warningContainer" class="warning-container">
@@ -338,6 +339,7 @@
 
     <div class="warning-buttons">
       <button class="button confirm" onclick="showPatchContent()">I understand that I am mature and acknowledge the consequence</button>
+      <!-- This link is already relative and correct -->
       <a href="revengequeen.html" class="button">Go Back</a>
     </div>
   </div>
@@ -362,9 +364,9 @@
               </ul>
             </div>
           </li>
-          <!-- Changed to a direct download link -->
+          <!-- CHANGE: Use relative path to the 'patches' directory -->
           <li class="file">
-            <a href="/patches/revengequeen/ReadMe.txt" download>ReadMe.txt</a>
+            <a href="patches/revengequeen/ReadMe.txt" download>ReadMe.txt</a>
           </li>
         </ul>
       </li>
@@ -388,9 +390,9 @@
               </li>
             </ul>
           </li>
-          <!-- Changed to a direct download link -->
+          <!-- CHANGE: Use relative path to the 'patches' directory -->
           <li class="file">
-            <a href="/patches/anothertitle/Update_Notes_v1.2.pdf" download>Update_Notes_v1.2.pdf</a>
+            <a href="patches/anothertitle/Update_Notes_v1.2.pdf" download>Update_Notes_v1.2.pdf</a>
           </li>
         </ul>
       </li>
