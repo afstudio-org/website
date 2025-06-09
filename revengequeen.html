@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Revenge Queen - AF Studio</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #121212;
+            color: #cce6ff;
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            /* Use min-height to allow content to push body height */
+            position: relative;
+            overflow-x: hidden;
+            /* Prevent horizontal scrollbar from fixed elements */
+        }
+
+        /* --- Global Elements (from original site) --- */
+        .site-title {
+            position: relative;
+            /* Stays at the top */
+            top: 40px;
+            font-size: 20px;
+            border: 1px solid #cce6ff;
+            padding: 6px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            color: #cce6ff;
+            z-index: 100;
+            /* Ensure it's above other content */
+            background-color: #121212;
+            /* To prevent content from showing through */
+        }
+
+        footer {
+            position: relative;
+            /* Stays at the bottom */
+            bottom: 20px;
+            text-align: center;
+            font-size: 14px;
+            color: #cce6ff;
+            z-index: 100;
+            /* Ensure it's above other content */
+            background-color: #121212;
+            /* To prevent content from showing through */
+            width: 100%;
+            /* Ensure it spans full width */
+        }
+
+        footer a {
+            color: #cce6ff;
+            text-decoration: none;
+        }
+
+        /* --- Character Images --- */
+        .character-container {
+            position: fixed;
+            /* Stays in place while content scrolls */
+            top: 0;
+            bottom: 0;
+            width: 20%;
+            /* Adjust as needed, e.g., 20% of viewport width */
+            display: flex;
+            align-items: center;
+            /* Vertically center the image */
+            justify-content: center;
+            /* Horizontally center the image within its container */
+            z-index: 1;
+            /* Below the main content */
+            pointer-events: none;
+            /* Allow clicks to pass through to content if needed */
+        }
+
+        .character-container img {
+            max-height: 90vh;
+            /* Max height relative to viewport height */
+            width: auto;
+            /* Maintain aspect ratio */
+            object-fit: contain;
+            /* Ensure image fits without cropping */
+        }
+
+        .character-left {
+            left: 0;
+        }
+
+        .character-right {
+            right: 0;
+        }
+
+        /* --- Main Content Area --- */
+        .main-content-wrapper {
+            width: clamp(300px, 60%, 900px);
+            /* Responsive width: min 300px, max 900px, ideally 60% */
+            margin-top: 100px;
+            /* Space for the fixed site-title */
+            margin-bottom: 80px;
+            /* Space for the fixed footer */
+            padding: 20px;
+            box-sizing: border-box;
+            /* Include padding in width */
+            overflow-y: auto;
+            /* Makes this section scrollable */
+            flex-grow: 1;
+            /* Allows it to take available vertical space */
+            z-index: 50;
+            /* Above characters, below header/footer */
+            background-color: rgba(18, 18, 18, 0.8);
+            /* Slightly transparent background for readability */
+            border-radius: 8px;
+            border: 1px solid #2a2a2a;
+            /* Subtle border */
+        }
+
+        .game-title {
+            font-size: 3em;
+            text-align: center;
+            margin-bottom: 40px;
+            color: #e0f7fa;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+        }
+
+        .content-section {
+            margin-bottom: 40px;
+            padding: 20px;
+            background-color: #1f1f1f;
+            border-radius: 8px;
+            border: 1px solid #2a2a2a;
+        }
+
+        .content-section h2 {
+            font-size: 2em;
+            color: #cce6ff;
+            margin-top: 0;
+            border-bottom: 1px solid #3a3a3a;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .content-section p {
+            line-height: 1.6;
+            font-size: 1.1em;
+        }
+
+        /* Screenshots Gallery */
+        .screenshot-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .screenshot-gallery img {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            border: 1px solid #3a3a3a;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            transition: transform 0.2s ease-in-out;
+        }
+
+        .screenshot-gallery img:hover {
+            transform: scale(1.02);
+        }
+
+        /* Video Trailer */
+        .video-container {
+            position: relative;
+            width: 100%;
+            padding-bottom: 56.25%;
+            /* 16:9 Aspect Ratio */
+            height: 0;
+            overflow: hidden;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 0;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 1024px) {
+            .character-container {
+                width: 15%;
+                /* Make characters slightly smaller on smaller screens */
+            }
+
+            .main-content-wrapper {
+                width: clamp(300px, 70%, 800px);
+                /* Allow content to be wider */
+            }
+        }
+
+        @media (max-width: 768px) {
+            .character-container {
+                display: none;
+                /* Hide characters on very small screens to save space */
+            }
+
+            .main-content-wrapper {
+                width: 90%;
+                /* Take up more width on small screens */
+                margin-top: 80px;
+                margin-bottom: 60px;
+            }
+
+            .site-title {
+                top: 20px;
+                font-size: 18px;
+            }
+
+            footer {
+                bottom: 10px;
+                font-size: 12px;
+            }
+
+            .game-title {
+                font-size: 2.5em;
+            }
+
+            .content-section h2 {
+                font-size: 1.8em;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <a href="/" class="site-title">AF STUDIO</a>
+
+    <!-- Left Character -->
+    <div class="character-container character-left">
+        <img src="character_left.png" alt="Revenge Queen Character 1">
+    </div>
+
+    <!-- Right Character -->
+    <div class="character-container character-right">
+        <img src="character_right.png" alt="Revenge Queen Character 2">
+    </div>
+
+    <!-- Main Scrollable Content -->
+    <div class="main-content-wrapper">
+        <div class="game-title">Revenge Queen</div>
+
+        <div class="content-section synopsis">
+            <h2>Synopsis</h2>
+            <p>
+                In a world shrouded by betrayal and shadowed by a forgotten past, "Revenge Queen" thrusts players into
+                the role of Elara, a once-revered monarch stripped of her throne and left for dead. Fueled by an
+                unyielding desire for vengeance, Elara rises from the ashes, wielding ancient magic and mastering
+                forbidden combat techniques. Journey through a sprawling, corrupted kingdom, from the desolate ruins of
+                her former palace to the treacherous depths of the Shadowfell. Unravel a conspiracy that reaches the
+                highest echelons of power, confront formidable foes, and reclaim what was unjustly taken. Every choice
+                shapes Elara's path – will she be a merciful queen or a ruthless avenger?
+            </p>
+            <p>
+                "Revenge Queen" offers a rich narrative, dynamic combat, and a world brimming with secrets. Prepare to
+                face your destiny and carve a new legend in blood and fire.
+            </p>
+        </div>
+
+        <div class="content-section screenshots">
+            <h2>Screenshots</h2>
+            <div class="screenshot-gallery">
+                <img src="screenshot_1.jpg" alt="Revenge Queen Gameplay Screenshot 1">
+                <img src="screenshot_2.jpg" alt="Revenge Queen Gameplay Screenshot 2">
+                <img src="screenshot_3.jpg" alt="Revenge Queen Gameplay Screenshot 3">
+                <img src="screenshot_4.jpg" alt="Revenge Queen Gameplay Screenshot 4">
+                <!-- Add more screenshot images as needed -->
+            </div>
+        </div>
+
+        <div class="content-section trailer">
+            <h2>Video Trailer</h2>
+            <div class="video-container">
+                <!-- Replace YOUR_VIDEO_ID with the actual YouTube video ID -->
+                <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" title="Revenge Queen Official Trailer"
+                    frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    referrerpolicy="strict-origin-when-cross-origin" allowfullscreen>
+                </iframe>
+            </div>
+            <p style="text-align: center; margin-top: 20px; font-style: italic;">
+                (Note: Replace the YouTube video ID in the iframe src with your actual trailer's ID.)
+            </p>
+        </div>
+
+        <!-- You can add more sections here, e.g., Features, System Requirements, etc. -->
+        <div class="content-section">
+            <h2>Key Features</h2>
+            <ul>
+                <li>Engaging story of vengeance and redemption.</li>
+                <li>Dynamic combat system with customizable abilities.</li>
+                <li>Explore a vast, beautifully rendered dark fantasy world.</li>
+                <li>Uncover hidden lore and powerful artifacts.</li>
+                <li>Multiple endings based on player choices.</li>
+            </ul>
+        </div>
+
+        <!-- In your revengequeen.html file -->
+        <div class="content-section">
+            <h2>Darker Route Patch</h2>
+            <p>This patch introduces the 'Darker Route' content, offering a more mature and intense experience. Please
+                note that
+                this content is intended for mature audiences only.</p>
+            <ul>
+                <li>Download the patch from <a href="patch.html" style="color: #cce6ff;">here</a>.</li>
+                <!-- Make sure this href is "patch.html" -->
+                <li>Extract the downloaded RAR archive and refer to the included `instructions.txt` file for detailed
+                    installation instructions.</li>
+            </ul>
+        </div>
+
+
+
+    </div>
+
+    <footer>
+        <div><a href="mailto:contact@afstudio.ovh">contact@afstudio.ovh</a></div>
+        <div>© 2025 AF Studio</div>
+    </footer>
+</body>
+
+</html>

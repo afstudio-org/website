@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Patches - AF Studio</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #121212;
+      color: #cce6ff;
+      font-family: 'Courier New', Courier, monospace;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center; /* Center content vertically initially for warning */
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden; /* Prevent horizontal scrollbar */
+    }
+
+    /* Reusing styles from your main site for consistency */
+    .site-title {
+      position: fixed;
+      top: 40px;
+      font-size: 20px;
+      border: 1px solid #cce6ff;
+      padding: 6px 16px;
+      border-radius: 6px;
+      text-decoration: none;
+      color: #cce6ff;
+      z-index: 100;
+      background-color: #121212; /* To prevent content from showing through */
+    }
+
+    footer {
+      position: fixed;
+      bottom: 20px;
+      text-align: center;
+      font-size: 14px;
+      color: #cce6ff;
+      z-index: 100;
+      background-color: #121212; /* To prevent content from showing through */
+      width: 100%;
+    }
+
+    footer a {
+      color: #cce6ff;
+      text-decoration: none;
+    }
+
+    /* --- Warning Container Styles --- */
+    .warning-container {
+      background-color: #1f1f1f;
+      border: 1px solid #cce6ff;
+      border-radius: 8px;
+      padding: 40px;
+      margin: 80px 20px; /* Space for fixed header/footer */
+      max-width: 600px;
+      text-align: center;
+      box-shadow: 0 0 20px rgba(0, 255, 255, 0.2); /* Subtle glow */
+      z-index: 50;
+    }
+
+    .warning-container h1 {
+      color: #ff6b6b; /* A warning red */
+      font-size: 2.5em;
+      margin-bottom: 20px;
+      text-shadow: 0 0 8px rgba(255, 107, 107, 0.5);
+    }
+
+    .warning-container p {
+      font-size: 1.1em;
+      line-height: 1.6;
+      margin-bottom: 30px;
+    }
+
+    .warning-buttons {
+      display: flex;
+      flex-direction: column; /* Stack buttons vertically */
+      gap: 20px;
+      margin-top: 30px;
+    }
+
+    /* Reusing button styles from your main site */
+    .button {
+      border: 1px solid #cce6ff;
+      border-radius: 8px;
+      padding: 12px 25px;
+      font-size: 1.1em;
+      text-decoration: none;
+      color: #cce6ff;
+      text-align: center;
+      transition: background 0.3s, border-color 0.3s, color 0.3s;
+      cursor: pointer;
+      background-color: transparent;
+      display: block;
+      width: 100%;
+      box-sizing: border-box;
+      font-family: inherit; /* Force font-family inheritance for buttons */
+    }
+
+    .button:hover {
+      background: #1f1f1f;
+      border-color: #e0f7fa;
+      color: #e0f7fa;
+    }
+
+    /* Specific style for the confirmation button */
+    .button.confirm {
+      background-color: #007bff; /* A more prominent color for confirmation */
+      border-color: #007bff;
+      color: #fff;
+    }
+
+    .button.confirm:hover {
+      background-color: #0056b3;
+      border-color: #0056b3;
+    }
+    /* --- Patch Content Styles --- */
+    .patch-content-wrapper {
+      display: none; /* Initially hidden */
+      width: clamp(300px, 70%, 900px); /* Responsive width */
+      margin-top: 100px; /* Space for fixed header */
+      margin-bottom: 80px; /* Space for fixed footer */
+      padding: 20px;
+      box-sizing: border-box;
+      background-color: rgba(18, 18, 18, 0.8);
+      border-radius: 8px;
+      border: 1px solid #2a2a2a;
+      z-index: 50;
+      flex-grow: 1; /* Allow it to take vertical space */
+      overflow-y: auto; /* Make this section scrollable if content overflows */
+    }
+
+    .patch-content-wrapper h1 {
+      font-size: 2.5em;
+      text-align: center;
+      margin-bottom: 40px;
+      color: #e0f7fa;
+      text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+    }
+
+    /* Tree View Styles */
+    .tree-view {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .tree-view ul {
+      list-style: none;
+      padding-left: 20px; /* Indent for nested items */
+      margin: 0;
+    }
+
+    .tree-view li {
+      margin-bottom: 8px;
+      position: relative;
+      padding-left: 20px; /* Space for the icon/line */
+    }
+
+    /* Vertical line for tree view */
+    .tree-view li:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 1px;
+      background-color: #3a3a3a; /* Darker line for subtle effect */
+    }
+
+    /* Horizontal line for tree view */
+    .tree-view li::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0.7em; /* Adjust to align with text */
+      width: 10px;
+      height: 1px;
+      background-color: #3a3a3a; /* Darker line */
+    }
+
+    /* Folder specific styles */
+    .tree-view li.folder > span {
+      font-weight: bold;
+      color: #e0f7fa;
+      cursor: pointer; /* Indicate it's clickable */
+      display: inline-block; /* Allows padding/margin for click area */
+      padding-right: 5px; /* Small space for icon */
+    }
+
+    .tree-view li.folder > span::before {
+      content: '⊹ '; /* Right arrow for collapsed folder */
+      margin-right: 5px;
+      color: #ffeb3b; /* Yellow folder */
+      transition: transform 0.2s ease-in-out; /* Smooth rotation */
+    }
+
+    .tree-view li.folder:not(.collapsed) > span::before {
+      content: '- '; /* Down arrow for expanded folder */
+      transform: rotate(0deg); /* Ensure no rotation if not collapsed */
+    }
+
+    /* Hide nested ul when folder is collapsed */
+    .tree-view li.folder.collapsed > ul {
+      display: none;
+    }
+
+    /* File and Patch specific styles */
+    /* Updated to target 'a' for file icon */
+    .tree-view li.file > a::before {
+      content: '📄 '; /* File icon */
+      margin-right: 5px;
+      color: #a7d9ff; /* Light blue file */
+    }
+
+    .tree-view li.patch > span::before {
+      content: '📦 '; /* Patch icon */
+      margin-right: 5px;
+      color: #ff9800; /* Orange patch */
+    }
+
+    .tree-view li a {
+      color: #cce6ff;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .tree-view li a:hover {
+      color: #e0f7fa;
+      text-decoration: underline;
+    }
+
+    /* Specific styles for the Darker Route Patch content */
+    .patch-details {
+      background-color: #1f1f1f;
+      border: 1px solid #2a2a2a;
+      border-radius: 8px;
+      padding: 20px;
+      margin-top: 10px; /* Space between title and details */
+      margin-bottom: 20px; /* Space after details */
+      display: none; /* Initially hidden, toggled by JS */
+    }
+
+    .patch-details h2 {
+      font-size: 1.8em;
+      color: #cce6ff;
+      margin-top: 0;
+      border-bottom: 1px solid #3a3a3a;
+      padding-bottom: 10px;
+      margin-bottom: 20px;
+    }
+
+    .patch-details p {
+      line-height: 1.6;
+      font-size: 1.1em;
+    }
+
+    .patch-details ul {
+      list-style: disc;
+      margin-left: 20px;
+      padding: 0;
+    }
+
+    .patch-details li {
+      margin-bottom: 10px;
+      padding-left: 0; /* Reset padding for list items inside details */
+    }
+
+    .patch-details li::before, .patch-details li::after {
+        content: none; /* Remove tree view lines for list items inside details */
+    }
+
+    .patch-details a {
+      color: #007bff; /* Blue for download link */
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .patch-details a:hover {
+      color: #0056b3;
+      text-decoration: underline;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .site-title {
+        top: 20px;
+        font-size: 18px;
+      }
+      footer {
+        bottom: 10px;
+        font-size: 12px;
+      }
+      .warning-container, .patch-content-wrapper {
+        padding: 25px;
+        margin: 60px 15px;
+        width: 90%; /* Take more width on small screens */
+      }
+      .warning-container h1, .patch-content-wrapper h1 {
+        font-size: 2em;
+      }
+      .warning-container p, .patch-details p {
+        font-size: 1em;
+      }
+      .button {
+        padding: 10px 20px;
+        font-size: 1em;
+      }
+      .tree-view ul {
+        padding-left: 15px;
+      }
+      .tree-view li {
+        padding-left: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Site Title (fixed at top) -->
+  <a href="/" class="site-title">AF STUDIO</a>
+
+  <!-- Warning Container (initially visible) -->
+  <div id="warningContainer" class="warning-container">
+    <h1>Content Warning</h1>
+    <p>
+      You are about to access content that is intended for mature audiences only. This "Darker Route Patch" may contain themes, imagery, or situations that are not suitable for minors or sensitive individuals.
+    </p>
+    <p>
+      By proceeding, you confirm that you are of legal age to access such content in your jurisdiction and that you understand and acknowledge any potential consequences or discomfort that may arise from viewing this material.
+    </p>
+    <p>
+      AF Studio assumes no responsibility for any consequences resulting from your decision to access this content.
+    </p>
+
+    <div class="warning-buttons">
+      <button class="button confirm" onclick="showPatchContent()">I understand that I am mature and acknowledge the consequence</button>
+      <a href="revengequeen.html" class="button">Go Back</a>
+    </div>
+  </div>
+
+  <!-- Patch Content Wrapper (initially hidden) -->
+  <div id="patchContentWrapper" class="patch-content-wrapper">
+    <h1>Available Patches</h1>
+
+    <ul class="tree-view">
+      <!-- Example: Revenge Queen Folder -->
+      <li class="folder collapsed">
+        <span class="folder-toggle">Revenge Queen</span>
+        <ul>
+          <li class="patch">
+            <span class="toggle-details">Darker Route Patch</span>
+            <div class="patch-details">
+              <h2>Darker Route Patch</h2>
+              <p>This patch introduces the 'Darker Route' content, offering a more mature and intense experience. Please note that this content is intended for mature audiences only.</p>
+              <ul>
+                  <li>Download the patch from <a href="https://example.com/revengequeen/darker_route_patch.rar" download style="color: #cce6ff;">here</a>.</li>
+                  <li>Extract the downloaded RAR archive and refer to the included `instructions.txt` file for detailed installation instructions.</li>
+              </ul>
+            </div>
+          </li>
+          <!-- Changed to a direct download link -->
+          <li class="file">
+            <a href="/patches/revengequeen/ReadMe.txt" download>ReadMe.txt</a>
+          </li>
+        </ul>
+      </li>
+
+      <!-- Example: Another Game Title Folder -->
+      <li class="folder collapsed">
+        <span class="folder-toggle">Another Title</span>
+        <ul>
+          <li class="folder collapsed">
+            <span class="folder-toggle">DLCs</span>
+            <ul>
+              <li class="patch">
+                <span class="toggle-details">Expansion Pack 1</span>
+                <div class="patch-details">
+                  <h2>Expansion Pack 1 for Another Title</h2>
+                  <p>This expansion adds new levels, characters, and story content.</p>
+                  <ul>
+                      <li>Download: <a href="https://example.com/anothertitle/dlc1.zip" download style="color: #cce6ff;">dlc1.zip</a></li>
+                  </ul>
+                </div>
+              </li>
+            </ul>
+          </li>
+          <!-- Changed to a direct download link -->
+          <li class="file">
+            <a href="/patches/anothertitle/Update_Notes_v1.2.pdf" download>Update_Notes_v1.2.pdf</a>
+          </li>
+        </ul>
+      </li>
+      <!-- Add more titles/folders/patches as needed -->
+    </ul>
+  </div>
+
+  <!-- Footer (fixed at bottom) -->
+  <footer>
+    <div><a href="mailto:contact@afstudio.ovh">contact@afstudio.ovh</a></div>
+    <div>© 2025 AF Studio</div>
+  </footer>
+
+  <script>
+    // Function to hide the warning and show the patch content
+    function showPatchContent() {
+      document.getElementById('warningContainer').style.display = 'none';
+      document.getElementById('patchContentWrapper').style.display = 'block';
+      // Adjust body alignment after warning is hidden to allow scrolling from top
+      document.body.style.justifyContent = 'flex-start';
+      document.body.style.alignItems = 'center'; // Keep centered horizontally
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      // Logic for toggling patch details (e.g., "Darker Route Patch" details)
+      const patchToggleSpans = document.querySelectorAll('.tree-view li.patch .toggle-details');
+      patchToggleSpans.forEach(span => {
+        span.addEventListener('click', function() {
+          const details = this.nextElementSibling; // This is the .patch-details div
+          if (details && details.classList.contains('patch-details')) {
+            details.style.display = details.style.display === 'block' ? 'none' : 'block';
+          }
+        });
+      });
+
+      // Logic for toggling folder visibility (e.g., "Revenge Queen" folder)
+      const folderToggleSpans = document.querySelectorAll('.tree-view li.folder > .folder-toggle'); // Select the span with folder-toggle class directly under folder li
+      folderToggleSpans.forEach(span => {
+        span.addEventListener('click', function() {
+          const parentLi = this.closest('li.folder'); // Get the parent <li>
+          if (parentLi) {
+            parentLi.classList.toggle('collapsed'); // Toggle the 'collapsed' class on the <li>
+          }
+        });
+      });
+
+      // Optional: Initially hide all patch details on page load
+      document.querySelectorAll('.patch-details').forEach(details => {
+        details.style.display = 'none';
+      });
+    });
+  </script>
+</body>
+</html>
